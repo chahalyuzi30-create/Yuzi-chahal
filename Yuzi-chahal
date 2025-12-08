@@ -1,0 +1,293 @@
+Here are the MATLAB codes from the document, organized section by section as presented in your file.
+
+## 1\. Generation of Discrete Time Signals
+
+This program generates unit sample, unit step, exponential, sinusoidal, and random sequences.
+
+```matlab
+clc; clear all; close all;
+N=10;
+n=-N:1:N;
+
+% Unit Impulse Signal
+x1=[zeros(1,N) 1 zeros(1,N)];
+subplot(4,2,1); stem(n,x1);
+title('Impulse Signal');
+
+% Unit Step Signal
+x2=[zeros(1,N) 1 ones(1,N)];
+subplot(4,2,2); stem(n,x2);
+title('Unit step signal');
+
+% Exponential Growing and Decaying Signal
+n2=0:0.1:N;
+a2=2;
+x4=a2.^n2;
+subplot(4,2,3); stem(n2,x4); 
+title('Exponential growing signal');
+
+a3=0.5;
+x5=a3.^n2;
+subplot(4,2,4); stem(n2,x5); 
+title('Exponential decaying signal');
+
+% Cosine and Sine Signals
+x6=cos(n2);
+subplot(4,2,5); stem(n2,x6); 
+title('Cosine signal');
+
+x7=sin(n2);
+subplot(4,2,6); stem(n2,x7); 
+title('sine signal');
+
+% Random Sequence
+x8=rand(1, 10);
+subplot(4,2,7);
+hist(x8); title('random sequence');
+```
+
+-----
+
+## 2\. Signal Operations
+
+This section covers addition, multiplication, folding, shifting, and scaling.
+
+### a) Addition and Multiplication
+
+```matlab
+x=[1 2 1 2];
+subplot (3,2,1); stem(x); title('input x');
+y=[2 2 1 1];
+subplot (3,2,2); stem(y); title('input y');
+
+% Addition
+a=x+y;
+subplot (3,2,3); stem(a); title('addition');
+
+% Multiplication
+b=x.*y;
+subplot (3,2,4); stem(b); title('multiplication');
+```
+
+### b) Folding a Signal
+
+```matlab
+clc; close all; clear all;
+n=-1:2;
+x=[3 -1 0 -4];
+subplot(2,1,1); stem(n,x); axis([-3 3 -5 5]);
+title('Signal x(n)');
+
+c=fliplr(x);
+y=fliplr(-n);
+subplot(2,1,2); stem(y,c); axis([-3 3 -5 5]);
+title('Reversed Signal x(-n)');
+```
+
+### c) Shifting a Signal
+
+```matlab
+n1=input('Enter the amount to be delayed: ');
+n2=input('Enter the amount to be advanced: ');
+n=-2:2;
+x=[-2 3 0 1 5];
+
+subplot(3,1,1); stem(n,x); title('Signal x(n)');
+
+% Shifting (Delay)
+m=n+n1;
+subplot(3,1,2); stem(m,x); title('Delayed signal x(n-n1)');
+
+% Shifting (Advance)
+t=n-n2;
+subplot(3,1,3); stem(t,x); title('Advanced signal x(n+n2)');
+```
+
+### d) Scaling a Signal
+
+```matlab
+clc; close all; clear all;
+n=[-2 -1 0 1 2];
+x=[3 1 0 4 6];
+
+subplot(3,1,1); stem(n,x); title('original');
+n2=4*n;
+subplot(3,1,2); stem(n2,x); title('scaled by 4');
+n3=2*n;
+subplot(3,1,3); stem(n3,x); title('scaled by 2');
+```
+
+-----
+
+## 3\. Linear Convolution (Manual)
+
+Convolution performed without built-in functions.
+
+```matlab
+clc; close all;
+x=input('enter the input sequence of x(n): ');
+h=input('enter the input sequence of h(n): ');
+
+n1=length(x);
+n2=length(h);
+N=n1+n2-1;
+
+% Zero padding
+x=[x, zeros(1, N-n1)];
+h=[h, zeros(1, N-n2)];
+y=zeros(1,N);
+
+% Perform convolution
+for n=1:N
+    for k=1:n
+        y(n)=y(n)+x(k)*h(n-k+1);
+    end
+end
+
+disp(y);
+ny=0:N-1;
+subplot(3,1,1); stem(ny,x); title('first sequence');
+subplot(3,1,2); stem(ny,h); title('second sequence');
+subplot(3,1,3); stem(ny,y); title('Convoluted sequence');
+```
+
+-----
+
+## 4\. Pole-Zero Plot and Frequency Response
+
+Analysis of a causal system $y(n)=0.9y(n-1)+x(n)$.
+
+```matlab
+% Transfer Function and Pole-Zero Plot
+numerator=1;
+denominator=[1, -0.9];
+H=tf(numerator, denominator);
+
+figure;
+pzmap(H); title('Pole-Zero Plot of H(z)'); grid on;
+
+% Frequency Response
+omega = linspace(-pi, pi, 512);
+H_freq = freqz(numerator, denominator, omega);
+magnitude = abs(H_freq);
+phase = angle(H_freq);
+
+figure;
+subplot(2,1,1); plot(omega, magnitude);
+title('Magnitude |H(e^{j\omega})|'); grid on;
+
+subplot(2,1,2); plot(omega, phase);
+title('Phase \angle H(e^{j\omega})'); grid on;
+
+% Impulse Response
+n=0:20;
+h=(0.9).^n;
+figure; stem(n,h,'filled');
+title('Impulse Response h(n)'); grid on;
+```
+
+-----
+
+## 5\. N-Point DFT (Manual)
+
+Computing the Discrete Fourier Transform without built-in functions.
+
+```matlab
+x=[1, 2, 3, 4]; 
+N=length(x);
+X=zeros(1,N);
+
+for k=0:N-1
+    for n=0:N-1
+        X(k+1)=X(k+1)+x(n+1)*exp(-1j*2*pi*k*n/N);
+    end
+end
+
+magnitude = abs(X);
+phase = angle(X);
+frequencies = (0:N-1)*(2*pi/N);
+
+figure;
+subplot(2,1,1); stem(frequencies, magnitude, 'filled'); 
+title('Magnitude Spectrum'); grid on;
+
+subplot(2,1,2); stem(frequencies, phase, 'filled');
+title('Phase Spectrum'); grid on;
+sgtitle('N-point DFT of the Sequence');
+```
+
+-----
+
+## 6\. Circular and Linear Convolution using DFT
+
+```matlab
+x=[1, 2, 3];
+h=[0.5, 1];
+
+% Circular Convolution
+N = max(length(x), length(h));
+X = fft(x, N);
+H = fft(h, N);
+y_circular = ifft(X .* H);
+
+% Linear Convolution
+L = length(x) + length(h) - 1;
+x_padded = [x, zeros(1, L-length(x))];
+h_padded = [h, zeros(1, L-length(h))];
+X_linear = fft(x_padded, L);
+H_linear = fft(h_padded, L);
+y_linear = ifft(X_linear .* H_linear);
+
+disp('Circular Convolution Result:'); disp(y_circular);
+disp('Linear Convolution Result:'); disp(y_linear);
+```
+
+-----
+
+## 8\. Radix-2 FFT Algorithm (Manual)
+
+A recursive implementation of the decimation-in-time radix-2 FFT.
+
+### Function File: `radix2_fft.m`
+
+```matlab
+function X = radix2_fft(x)
+    N = length(x);
+    if mod(N, 2) ~= 0 || N == 0
+        error('Length of input must be a power of 2');
+    end
+    
+    if N == 1
+        X = x; 
+        return;
+    end
+    
+    X_even = radix2_fft(x(1:2:N));
+    X_odd = radix2_fft(x(2:2:N));
+    
+    X = zeros(1, N);
+    for k = 0:N/2-1
+        twiddle = exp(-1j*2*pi*k/N) * X_odd(k+1);
+        X(k+1) = X_even(k+1) + twiddle;
+        X(k+N/2+1) = X_even(k+1) - twiddle;
+    end
+end
+```
+
+### Main Script for Testing FFT
+
+```matlab
+N=8;
+x=[1,2,3,4,0,0,0,0];
+X = radix2_fft(x);
+
+figure;
+subplot(2, 1, 1); stem(0:N-1, abs(X), 'filled');
+title('Magnitude of FFT'); grid on;
+
+subplot(2, 1, 2); stem(0:N-1, angle(X), 'filled');
+title('Phase of FFT'); grid on;
+sgtitle('Radix-2 FFT Result');
+```
+
+Would you like me to explain the logic behind the convolution loop or the FFT recursion in these codes?
