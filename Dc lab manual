@@ -1,0 +1,193 @@
+Here is the MATLAB code for all the programs provided in the document, with the comment symbols (%) removed as requested.
+
+### 1\. Gram-Schmidt Orthogonalization
+
+[cite_start]This code generates orthonormal basis vectors from a given set of vectors[cite: 4, 12].
+
+```matlab
+V = [1 0 0; 1 1 1; 0 0 1]'; 
+num_vectors = size(V,2);
+U = zeros(size(V));
+E = zeros(size(V));
+
+U(:,1) = V(:,1); 
+E(:,1) = U(:,1) / norm(U(:,1)); 
+
+for i = 2:num_vectors
+    U(:,i) = V(:,i);
+    for j = 1:i-1
+        U(:,i) = U(:,i) - (dot(V(:,i), E(:,j)) * E(:,j)); 
+    end
+    E(:,i) = U(:,i) / norm(U(:,i)); 
+end
+
+disp('Orthonormal basis vectors:');
+disp(E);
+
+figure;
+hold on;
+grid on;
+axis equal;
+
+quiver3(0, 0, 0, V(1,1), V(2,1), V(3,1), 'r', 'LineWidth', 2);
+quiver3(0, 0, 0, V(1,2), V(2,2), V(3,2), 'g', 'LineWidth', 2);
+quiver3(0, 0, 0, V(1,3), V(2,3), V(3,3), 'b', 'LineWidth', 2);
+
+quiver3(0, 0, 0, E(1,1), E(2,1), E(3,1), 'r--', 'LineWidth', 2);
+quiver3(0, 0, 0, E(1,2), E(2,2), E(3,2), 'g--', 'LineWidth', 2);
+quiver3(0, 0, 0, E(1,3), E(2,3), E(3,3), 'b--', 'LineWidth', 2);
+
+xlabel('X'); ylabel('Y'); zlabel('Z');
+legend('Original V1', 'Original V2', 'Original V3', 'Orthonormal E1', 'Orthonormal E2', 'Orthonormal E3');
+title('Original and Orthonormal Vectors');
+hold off;
+```
+
+-----
+
+### 2\. QPSK Modulation and Constellation
+
+[cite_start]This code performs Quadrature Phase Shift Keying modulation on a bit sequence[cite: 97, 130].
+
+```matlab
+clc;
+clear all;
+close all;
+
+bit_seq = [1 1 0 0 0 0 1 1];
+N = length(bit_seq);
+fc = 1; 
+t = 0:0.001:2; 
+
+b = [];      
+qpsk1 = [];  
+bec = [];    
+bes = [];    
+b_o = [];    
+b_e = [];    
+bit_e = [];  
+bit_o = [];  
+
+for i = 1:N
+    bx = bit_seq(i) * ones(1, 1000); 
+    b = [b, bx];
+end
+
+for i = 1:N
+    if bit_seq(i) == 0
+        bit_seq(i) = -1;
+    end
+    if mod(i, 2) == 0
+        e_bit = bit_seq(i);
+        b_e = [b_e, e_bit];
+    else
+        o_bit = bit_seq(i);
+        b_o = [b_o, o_bit];
+    end
+end
+
+for i = 1:N/2
+    be_c = (b_e(i) * cos(2 * pi * fc * t));
+    bo_s = (b_o(i) * sin(2 * pi * fc * t));
+    q = be_c + bo_s; 
+    
+    even = b_e(i) * ones(1, 2000);
+    odd = b_o(i) * ones(1, 2000);
+    bit_e = [bit_e, even];
+    bit_o = [bit_o, odd];
+    qpsk1 = [qpsk1, q];
+    bec = [bec, be_c];
+    bes = [bes, bo_s];
+end
+
+figure('name', 'QPSK Modulation');
+subplot(5, 1, 1); plot(b); grid on; axis([0 N*1000 0 1]); title('Binary Input Sequence');
+subplot(5, 1, 2); plot(bes); hold on; plot(bit_o, 'rs:'); grid on; title('Odd Bits (Sine Component)');
+subplot(5, 1, 3); plot(bec); hold on; plot(bit_e, 'rs:'); grid on; title('Even Bits (Cosine Component)');
+subplot(5, 1, 4); plot(qpsk1); axis([0 N*1000 -1.5 1.5]); title('QPSK Modulated Signal');
+
+subplot(5, 1, 5);
+constellation = [1+1j, -1+1j, -1-1j, 1-1j];
+plot(real(constellation), imag(constellation), 'bo', 'MarkerSize', 8, 'LineWidth', 2);
+grid on; axis([-2 2 -2 2]); title('QPSK Constellation');
+xlabel('In-phase (I)'); ylabel('Quadrature (Q)');
+```
+
+-----
+
+### 3\. BER for Rectangular Pulse (AWGN Channel)
+
+[cite_start]This code simulates binary baseband signals and calculates the Bit Error Rate[cite: 272, 311].
+
+```matlab
+N = 1e4; 
+SNR_dB = 0:5:20; 
+pulse_width = 1;
+
+data = randi([0 1], N, 1);
+t = 0:0.01:pulse_width;
+rect_pulse = ones(size(t));
+BER = zeros(length(SNR_dB), 1);
+
+for snr_idx = 1:length(SNR_dB)
+    tx_signal = [];
+    for i = 1:N
+        if data(i) == 1
+            tx_signal = [tx_signal; rect_pulse'];
+        else
+            tx_signal = [tx_signal; zeros(size(rect_pulse'))];
+        end
+    end
+    
+    SNR = 10^(SNR_dB(snr_idx) / 10);
+    noise_power = 1 / (2 * SNR);
+    noise = sqrt(noise_power) * randn(length(tx_signal), 1);
+    rx_signal = tx_signal + noise;
+    
+    matched_filter = rect_pulse;
+    filtered_signal = conv(rx_signal, matched_filter, 'same');
+    
+    sample_interval = round(length(filtered_signal) / N);
+    sampled_signal = filtered_signal(1:sample_interval:end);
+    estimated_bits = sampled_signal > 0.5;
+    
+    num_errors = sum(estimated_bits(1:N) ~= data);
+    BER(snr_idx) = num_errors / N;
+end
+
+figure;
+semilogy(SNR_dB, BER, 'b-o');
+grid on;
+xlabel('SNR (dB)'); ylabel('Bit Error Rate (BER)');
+title('BER vs. SNR for Rectangular Pulse Modulated Binary Data');
+```
+
+-----
+
+### 4\. Convolutional Encoding and Decoding
+
+[cite_start]This code utilizes the Viterbi algorithm to decode a message after simulating noise[cite: 347, 354].
+
+```matlab
+clc; clear; close all;
+
+msg = [1 0 1 1 0 1 0 0];
+constraint_length = 3;
+generator_polynomials = [7 5]; 
+
+trellis = poly2trellis(constraint_length, generator_polynomials);
+encoded_msg = convenc(msg, trellis);
+
+encoded_msg_noisy = encoded_msg;
+encoded_msg_noisy(4) = ~encoded_msg_noisy(4);
+
+traceback_length = 5;
+decoded_msg = vitdec(encoded_msg_noisy, trellis, traceback_length, 'trunc', 'hard');
+
+disp('Original Message:'); disp(msg);
+disp('Encoded Message:'); disp(encoded_msg);
+disp('Noisy Encoded Message (with bit flip):'); disp(encoded_msg_noisy);
+disp('Decoded Message:'); disp(decoded_msg);
+```
+
+Would you like me to generate a specific input bit sequence for any of these to see how the results change?
