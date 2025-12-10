@@ -1,0 +1,211 @@
+Certainly\! You are requesting the MATLAB code snippets without the comment lines (the lines starting with `%`). This will give you the core executable code structure.
+
+Since you confirmed for all codes previously, I will provide the stripped versions for all five programs.
+
+-----
+
+### 1\. ⚛️ **Gram-Schmidt Orthogonalization Process**
+
+```matlab
+clc; close all;
+V = [1 0 0; 0 1 1; 0 0 0]'; 
+
+[m, num] = size(V); 
+E = zeros(size(V)); 
+U = zeros(size(V)); 
+
+U(:, 1) = V(:, 1);
+E(:, 1) = U(:, 1)/norm(U(:, 1));
+
+for i = 2:num
+    proj = 0;
+    for j = 1:i-1
+        coeff = (V(:, i)' * U(:, j)) / (U(:, j)' * U(:, j));
+        proj = proj + coeff * U(:, j);
+    end
+    
+    U(:, i) = V(:, i) - proj;
+    E(:, i) = U(:, i)/norm(U(:, i));
+end
+
+disp('Orthonormal basis');
+disp(E)
+
+figure;
+hold on; grid on; axis equal;
+colors = ['r', 'g', 'b'];
+
+for i = 1:m 
+    quiver3(0, 0, 0, V(1, i), V(2, i), V(3, i), colors(i), 'LineWidth', 2);
+    quiver3(0, 0, 0, E(1, i), E(2, i), E(3, i), colors(i), 'LineStyle', '--');
+end
+
+legend({'v1', 'v2', 'v3', 'e1', 'e2', 'e3'});
+title('Original vs Orthonormal Vectors');
+xlabel('X'); ylabel('Y'); zlabel('Z');
+```
+
+-----
+
+### 2\. 📝 **Huffman Coding**
+
+```matlab
+clc; clear;
+
+p = input('Enter the probabilities [p1 p2 ...]: '); 
+n = length(p);
+
+symbols = 1:n;
+[dict, avglen] = huffmandict(symbols, p);
+
+disp('The Huffman code dictionary:');
+for i = 1:n
+    fprintf('Symbol %d: %s\n', symbols(i), num2str(dict{i, 2}));
+end
+
+sym = input(sprintf('Enter the symbols between 1 to %d in []: ', n));
+encoded = huffmanenco(sym, dict);
+disp('The encoded output:');
+disp(encoded);
+
+bits = input('Enter the bit stream in []: ');
+decoded = huffmandeco(bits, dict);
+disp('The decoded symbols are:');
+disp(decoded);
+```
+
+-----
+
+### 3\. 🛡️ **Error Correction (Parity/Hamming Code Example)**
+
+```matlab
+clc; clear;
+
+data = [1 0 1 0]; 
+
+p1 = mod(data(1) + data(2) + data(4), 2); 
+p2 = mod(data(1) + data(3) + data(4), 2);
+p3 = mod(data(2) + data(3) + data(4), 2); 
+
+encoded_data = [p1 p2 data(1) p3 data(2) data(3) data(4)]; 
+disp('Encoded data');
+disp(encoded_data); 
+
+recv = [1 0 1 1 0 1 0]; 
+recv(2) = mod(recv(2)+1, 2); 
+
+disp('Received data');
+disp(recv); 
+
+s1 = mod(recv(1) + recv(3) + recv(5) + recv(7), 2);
+s2 = mod(recv(2) + recv(3) + recv(6) + recv(7), 2);
+s3 = mod(recv(4) + recv(5) + recv(6) + recv(7), 2);
+
+error_location = bin2dec([num2str(s3) num2str(s2) num2str(s1)]);
+
+if error_location ~= 0
+    encoded_data(error_location) = mod(encoded_data(error_location) + 1, 2); 
+end
+
+disp('s1');
+disp(s1);
+disp('s2');
+disp(s2);
+disp('s3');
+disp(s3);
+
+decoded_data = recv([3 5 6 7]); 
+
+disp('Decoded Data (4 bits):');
+disp(decoded_data); 
+```
+
+-----
+
+### 4\. 📈 **16-QAM Modulation**
+
+```matlab
+clc; clear;
+
+R = 1e3;               
+N = 1000;
+k = 4;                 
+
+b = randi([0, 1], 1, N*k);
+
+B = reshape(b, k, N)';
+
+I = 2*b(1:4:end) + b(2:4:end);  
+Q = 2*b(3:4:end) + b(4:4:end); 
+
+I = 2*I - 3;
+Q = 2*Q - 3;
+
+symbols = I + 1j*Q;
+
+figure;
+scatter(real(symbols), imag(symbols), 'bo');
+grid on; axis equal;
+title('16-QAM Constellation');
+xlabel('In-phase');
+ylabel('Quadrature');
+
+snr_db = 20;
+rx = awgn(symbols, snr_db, 'measured');
+
+figure;
+scatter(real(rx), imag(rx), 'rx', 'LineWidth', 2);
+grid on; axis equal;
+title(['16-QAM Constellation with Noise (SNR = ', num2str(snr_db), ' dB)']);
+axis([-4 4 -4 4]);
+```
+
+-----
+
+### 5\. 📉 **BER vs SNR for Binary Baseband**
+
+```matlab
+clc; clear; close all;
+
+N = 1e4;               
+pulse_width = 1;       
+t = 0:0.01:pulse_width;
+pulse = ones(length(t), 1); 
+
+data = randi([0, 1], N, 1); 
+tx = kron(data, pulse);     
+tx = 2*tx - 1; 
+tx = 1e-4*tx; 
+
+SNR_dB = 0:5:20;       
+BER = zeros(length(SNR_dB), 1);
+
+for i = 1:length(SNR_dB)
+    
+    noise_variance = 1 / (10^(SNR_dB(i)/10)); 
+    noise_std = sqrt(noise_variance);
+    
+    noise = noise_std * randn(size(tx));
+    rx = tx + noise;
+    
+    filt = conv(rx, fliplr(pulse)'); 
+    
+    sample_indices = length(pulse):length(pulse):length(filt);
+    sampled = filt(sample_indices);
+
+    detected = sampled > 0; 
+    
+    BER(i) = sum(detected' ~= data) / N; 
+    
+end
+
+figure;
+semilogy(SNR_dB, BER, 'b-o', 'LineWidth', 2);
+grid on;
+xlabel('SNR (dB)');
+ylabel('BER');
+title('BER vs SNR for Binary Baseband using Rectangular Pulse');
+```
+
+Let me know if you would like me to explain any specific line of code or the underlying communication theory/linear algebra concept\!
+
