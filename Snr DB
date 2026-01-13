@@ -1,0 +1,28 @@
+clc; clear; close all;
+
+N = 1e4;
+pulse_width = 1;
+t = 0:0.01:pulse_width;
+pulse = ones(length(t),1);
+
+data = randi([0 1], N, 1);
+tx = kron(data, pulse);
+SNR_dB = 0:5:20;
+BER = zeros(length(SNR_dB),1);
+
+for i = 1:length(SNR_dB)
+    noise = sqrt(0.5 * 10^(-SNR_dB(i)/10)) * randn(size(tx));
+    rx = tx + noise;
+
+    filt = conv(rx, pulse);
+    sampled = filt(length(pulse):length(pulse):end);
+
+    detected = sampled > 0.5;
+    BER(i) = sum(detected ~= data) / N;
+end
+
+semilogy(SNR_dB, BER, 'b-o', 'LineWidth', 2);
+grid on;
+xlabel('SNR (dB)');
+ylabel('BER');
+title('BER vs SNR for Binary Baseband using Rectangular Pulse');
