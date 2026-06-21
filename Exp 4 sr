@@ -1,0 +1,40 @@
+module sr_flipflop( 
+output reg q, qbar, 
+input s, r, clk
+);
+always @(posedge clk) begin 
+if (s == 1 && r == 0) begin
+q <= 1;
+qbar <= 0; 
+end
+else if (s == 0 && r == 1) begin 
+q <= 0;
+qbar <= 1; 
+end
+else if (s == 0 && r == 0) begin 
+q <= q; // Hold previous state 
+qbar <= qbar;
+end
+else if (s == 1 && r == 1) begin 
+q <= 1'bx; // Undefined state 
+qbar <= 1'bx;
+end 
+end
+endmodule
+____________
+
+module sr_flipflop_tb; 
+reg s, r, clk;
+wire q, qbar;
+sr_flipflop uut (.q(q), .qbar(qbar), .s(s), .r(r), .clk(clk));
+initial begin
+clk = 0; s = 0; r = 0;
+#10 s = 1; r = 0;
+#10 s = 0; r = 0;
+#10 s = 0; r = 1;
+#10 s = 1; r = 1;
+#10 s = 0; r = 0;
+#50 $finish;
+end
+always #5 clk = ~clk;
+endmodule
