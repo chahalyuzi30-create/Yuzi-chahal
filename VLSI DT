@@ -10,12 +10,7 @@ full_adder fa1(a[1],b[1],c0,s[1],c2);
 full_adder fa2(a[2],b[2],c0,s[2],c3);
 full_adder fa3(a[3],b[3],c0,s[3],c4);
 endmodule
-module full_adder(a,b,ci,s,c0);
-input a,b,ci;
-output s,c0;
-assign s=a^b^ci;
-assign c0=(a&b)|(b&ci)|(ci&a);
-endmodule
+----______________
 
 TEST BENCH
 4 BIT ADDER TB
@@ -35,7 +30,8 @@ end initial
 #50 $finish;
 endmodule
 
-2---'zxxzzz------
+2---'zxxzzz------_______________
+
 4 BIT SHIFT ADD
 `timescale 1ns/1ps//Define time unit and presicion
 module shiftadd (input [3:0] a,input [3:0] 
