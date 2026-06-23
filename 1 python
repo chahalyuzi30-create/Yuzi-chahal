@@ -1,0 +1,396 @@
+# Tic Tac Toe Game: Player = X, AI = O
+board = [" "] * 9
+wins = [
+    (0,1,2), (3,4,5), (6,7,8),
+    (0,3,6), (1,4,7), (2,5,8),
+    (0,4,8), (2,4,6)
+]
+def show():
+    for i in range(0, 9, 3):
+        print(board[i], "|", board[i+1], "|", board[i+2])
+    print()
+def check(player):
+    for a, b, c in wins:
+        if board[a] == board[b] == board[c] == player:
+            return True
+    return False
+while " " in board:
+    show()
+    pos = int(input("Enter position (1-9): ")) - 1
+    if board[pos] != " ":
+        print("Position already occupied!")
+        continue
+    board[pos] = "X"
+    if check("X"):
+        show()
+        print("Player X Wins")
+        break
+    if " " not in board:
+        show()
+        print("Match Draw")
+
+        break
+    for i in range(9):
+        if board[i] == " ":
+            board[i] = "O"
+            print("AI played at", i + 1)
+            break
+    if check("O"):
+        show()
+        print("AI Wins")
+        break
+else:
+    show()
+    print("Match Draw")
+
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+def count_inversions(state):
+    arr = [x for x in state if x != 0] 
+    inv = 0
+    for i in range(len(arr)):
+        for j in range(i + 1, len(arr)):
+            if arr[i] > arr[j]:
+                inv += 1
+    return inv
+def get_label(state):
+    return count_inversions(state) % 2
+states = [
+    [1,2,3,4,5,6,7,8,0],
+    [1,2,3,4,5,6,8,7,0],
+    [1,2,3,4,5,6,7,0,8],
+    [1,2,3,5,4,6,7,8,0],
+    [1,3,2,4,5,6,7,8,0],
+    [1,2,3,4,6,5,7,8,0]
+]
+labels = [get_label(s) for s in states]
+model = DecisionTreeClassifier()
+model.fit(states, labels)
+print("Enter 8 numbers for the 8-puzzle (1-8). Blank will be added automatically as 0.")
+try:
+    user_input = list(map(int, input("Enter 8 numbers separated by space: ").split()))    
+    if len(user_input) != 8:
+        print("Error: Enter exactly 8 numbers.")
+    else:
+        user_input.append(0)  
+        total_inv = count_inversions(user_input)
+        parity = "Even" if total_inv % 2 == 0 else "Odd"
+        test_state = np.array(user_input).reshape(1, -1)
+        prediction = model.predict(test_state)[0]
+
+        print("\nPuzzle State:", user_input)
+        print("Total Inversions:", total_inv)
+        print("Inversion Parity:", parity) 
+        if prediction == 0:
+            print("This state belongs to EVEN set → Reachable from goal state")
+        else:
+            print("This state belongs to ODD set → Not reachable from goal state")
+except ValueError:
+    print("Error: Please enter only integers.")
+
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifierattendance, internal_marks):
+    return attendance >= 75 and internal_marks >= 40
+students = [
+    {"Name": "Alice", "Attendance": 80, "InternalMarks": 45},
+    {"Name": "Bob", "Attendance": 70, "InternalMarks": 50},
+    {"Name": "Charlie", "Attendance": 90, "InternalMarks": 38},
+    {"Name": "David", "Attendance": 78, "InternalMarks": 42},
+]
+print("=== Predicate Logic Evaluation ===")
+for s in students:
+    eligible = check_eligibility(s["Attendance"], s["InternalMarks"])
+    status = "Eligible" if eligible else "Not Eligible"
+    print(f"{s['Name']}: {status}")
+data = [
+    {"Attendance": 80, "InternalMarks": 45, "Eligible": 1},
+    {"Attendance": 70, "InternalMarks": 50, "Eligible": 0},
+    {"Attendance": 90, "InternalMarks": 38, "Eligible": 0},
+    {"Attendance": 78, "InternalMarks": 42, "Eligible": 1},
+    {"Attendance": 60, "InternalMarks": 30, "Eligible": 0},
+    {"Attendance": 85, "InternalMarks": 50, "Eligible": 1},
+]
+df = pd.DataFrame(data)
+X = df[["Attendance", "InternalMarks"]]
+y = df["Eligible"]
+model = DecisionTreeClassifier()
+model.fit(X, y)
+print("\n=== Student Eligibility Check ===")
+try:
+    attendance = int(input("Enter attendance (%): "))
+    marks = int(input("Enter internal marks: "))
+
+    logic_result = check_eligibility(attendance, marks)
+    logic_status = "Eligible" if logic_result else "Not Eligible"
+    new_student = pd.DataFrame(
+        [{"Attendance": attendance, "InternalMarks": marks}]
+    )
+    prediction = model.predict(new_student)[0]
+    ml_status = "Eligible" if prediction == 1 else "Not Eligible"
+    print("\nPredicate Logic:", logic_status)
+    print("Machine Learning:", ml_status)
+except ValueError:
+    print("Please enter valid integers.")
+
+__________
+
+from sklearn.tree import DecisionTreeClassifier
+encode = {
+    "High": 1, "Low": 0,
+    "Good": 1, "Poor": 0
+}
+data = []
+labels = []
+n = int(input("Enter number of students: "))
+for i in range(n):
+    print(f"\nStudent {i+1}")
+    name = input("Enter Student Name: ")
+    att = input("Attendance (High/Low): ").strip().capitalize()
+    internal = input("Internal Marks (Good/Poor): ").strip().capitalize()
+    external = input("External Marks (Good/Poor): ").strip().capitalize()
+    eligible = 1 if att=="High" and internal=="Good" and external=="Good" else 0
+    data.append([
+        encode[att],
+        encode[internal],
+        encode[external]
+    ])
+    labels.append(eligible)
+    if eligible:
+        print(name, "-> Eligible")
+    else:
+        print(name, "-> Not Eligible")
+model = DecisionTreeClassifier()
+model.fit(data, labels)
+print("ML Model Trained Successfully")
+
+__________
+
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+data = {
+    'Outlook': ['Sunny','Sunny','Overcast','Rain','Rain','Rain','Overcast','Sunny','Sunny','Rain','Sunny','Overcast','Overcast','Rain'],
+    'Temperature': ['Hot','Hot','Hot','Mild','Cool','Cool','Cool','Mild','Cool','Mild','Mild','Mild','Hot','Mild'],
+    'Humidity': ['High','High','High','High','Normal','Normal','Normal','High','Normal','Normal','Normal','High','Normal','High'],   
+    'Windy': ['False','True','False','False','False','True','True','False','False','False','True','True','False','True'],
+    'Play': ['No','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No']
+}
+df = pd.DataFrame(data)
+X = pd.get_dummies(df.drop('Play', axis=1))
+y = df['Play']
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+depths = [1, 2, 3, 4]
+print("===== ID3 PERFORMANCE ANALYSIS =====\n")
+for depth in depths:
+    model = DecisionTreeClassifier(
+        criterion='entropy',
+        max_depth=depth,
+        random_state=42
+    )
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Tree Depth : {depth}")
+    print(f"Accuracy   : {accuracy:.2f}")
+    if depth == 1:
+        print("Observation: Possible Underfitting")
+    elif depth >= 4:
+        print("Observation: Possible Overfitting")
+    else:
+        print("Observation: Balanced Model")
+    print("-" * 40)
+
+_________
+
+import os, warnings
+os.environ["OMP_NUM_THREADS"] = "1"
+warnings.filterwarnings("ignore")
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.cluster import KMeans
+from sklearn.semi_supervised import LabelPropagation
+from sklearn.metrics import accuracy_score
+X = np.array([
+    [1,2],[2,3],[3,4],[4,5],
+    [6,7],[7,8],[8,9],[9,10]
+])
+y = np.array([0,0,0,0,1,1,1,1])
+# 1. SUPERVISED LEARNING
+print("\n=== SUPERVISED LEARNING ===")
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+model = LogisticRegression()
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+print("Prediction :", pred)
+print("Accuracy   :", accuracy_score(y_test, pred))
+# 2. UNSUPERVISED LEARNING
+print("\n=== UNSUPERVISED LEARNING ===")
+kmeans = KMeans(n_clusters=2, random_state=42, n_init=10)
+clusters = kmeans.fit_predict(X)
+
+print("Clusters :", clusters)
+
+plt.scatter(X[:,0], X[:,1], c=clusters)
+plt.title("K-Means Clustering")
+plt.show()
+# 3. SEMI-SUPERVISED LEARNING
+print("\n=== SEMI-SUPERVISED LEARNING ===")
+y_semi = np.array([0,-1,-1,0,1,-1,-1,1])
+semi = LabelPropagation()
+semi.fit(X, y_semi)
+print("Predicted Labels :", semi.transduction_)
+# 4. REINFORCEMENT LEARNING
+print("\n=== REINFORCEMENT LEARNING ===")
+Q = np.zeros((8,2))
+for i in range(100):
+    s = np.random.randint(0,8)
+    a = np.random.randint(0,2)
+    ns = (s+a) % 8
+    r = y[ns] * 10
+    Q[s,a] += 0.1 * (r + 0.9*np.max(Q[ns]) - Q[s,a])
+print("Q-Table:\n", Q)
+
+________
+
+import pandas as pd
+data = [
+ ['Sunny','Warm','Normal','Strong','Warm','Same','Yes'],
+ ['Sunny','Warm','High','Strong','Warm','Same','Yes'],
+ ['Rainy','Cold','High','Strong','Warm','Change','No'],
+ ['Sunny','Warm','High','Strong','Cool','Change','Yes']
+]
+df = pd.DataFrame(data)
+print("Dataset:\n", df)
+# ---------------- FIND-S ----------------
+S = ['0'] * (len(df.columns)-1)
+for row in df.values:
+    if row[-1] == 'Yes':
+        for i in range(len(S)):
+            if S[i] == '0':
+                S[i] = row[i]
+            elif S[i] != row[i]:
+                S[i] = '?'
+print("\nFind-S Hypothesis :", S)
+# -------- CANDIDATE ELIMINATION --------
+G = [['?'] * len(S)]
+for row in df.values:
+    x, label = row[:-1], row[-1]
+    if label == 'No':
+        new_G = []
+        for g in G:
+            for i in range(len(S)):
+                if g[i] == '?' and S[i] != x[i]:
+                    h = g.copy()
+                    h[i] = S[i]
+                    new_G.append(h)
+        G = new_G
+print("\nFinal S :", S)
+print("\nFinal G :")
+for g in G:
+    print(g)
+
+_______
+
+# CALIFORNIA HOUSING PRICE PREDICTION
+import os, warnings
+os.environ["OMP_NUM_THREADS"] = "1"
+warnings.filterwarnings("ignore")
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+data = fetch_california_housing(as_frame=True).frame
+print("Dataset Shape:", data.shape)
+print(data.head())
+data.hist(figsize=(12,10))
+plt.suptitle("Feature Histograms")
+plt.show()
+X = data.drop("MedHouseVal", axis=1)
+y = data["MedHouseVal"]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+pipe = Pipeline([
+
+    ("imp", SimpleImputer(strategy="median")),
+    ("scale", StandardScaler())
+])
+X_train = pipe.fit_transform(X_train)
+X_test = pipe.transform(X_test)
+model = RandomForestRegressor(random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+print("\nRMSE :", round(np.sqrt(mean_squared_error(y_test, y_pred)),3))
+print("R2 Score :", round(r2_score(y_test, y_pred),3))
+imp = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": model.feature_importances_
+}).sort_values(by="Importance", ascending=False)
+print("\nFeature Importance:\n", imp)
+plt.figure(figsize=(10,5))
+plt.bar(imp["Feature"], imp["Importance"])
+plt.xticks(rotation=45)
+plt.title("Feature Importance")
+plt.show()
+plt.figure(figsize=(7,5))
+plt.scatter(y_test, y_pred)
+plt.xlabel("Actual Prices")
+plt.ylabel("Predicted Prices")
+plt.title("Actual vs Predicted House Prices")
+
+plt.show()
+print("\nSample Predictions:\n")
+print(pd.DataFrame({
+    "Actual": y_test.values[:10],
+    "Predicted": y_pred[:10]
+}))
+print("\nProject Completed Successfully!")
+
+________
+
+import pandas as pd
+
+# Create Play Tennis dataset
+data = {
+    'Outlook':['Sunny','Sunny','Overcast','Rain','Rain'],
+    'Temperature':['Hot','Hot','Hot','Mild','Cool'],
+    'Humidity':['High','High','High','High','Normal'],
+    'Wind':['Weak','Strong','Weak','Weak','Weak'],
+    'Play':['No','No','Yes','Yes','Yes']
+}
+df = pd.DataFrame(data)
+
+# Get user input
+print("=== Play Tennis Prediction ===")
+outlook = input("Outlook (Sunny/Overcast/Rain): ").capitalize()
+temp = input("Temperature (Hot/Mild/Cool): ").capitalize()
+humidity = input("Humidity (High/Normal): ").capitalize()
+wind = input("Wind (Weak/Strong): ").capitalize()
+
+# Apply decision rules
+if outlook == "Overcast":
+    prediction = "Yes"
+elif outlook == "Sunny" and humidity == "High":
+    prediction = "No"
+elif outlook == "Rain" and wind == "Strong":
+    prediction = "No"
+else:
+    prediction = "Yes"
+
+# Display result
+print("\nPrediction :", prediction)
+
+___________
